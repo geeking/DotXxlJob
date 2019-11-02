@@ -14,7 +14,8 @@
         public T Get(int refid)
         {
             T entry;
-            if (map.TryGetKey(refid, out entry)) {
+            if (map.TryGetKey(refid, out entry))
+            {
                 return entry;
             }
 
@@ -24,7 +25,8 @@
         public int? Lookup(T entry)
         {
             int refId;
-            if (map.TryGetValue(entry, out refId)) {
+            if (map.TryGetValue(entry, out refId))
+            {
                 return refId;
             }
 

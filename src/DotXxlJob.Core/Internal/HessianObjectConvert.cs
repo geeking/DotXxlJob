@@ -10,30 +10,31 @@ namespace DotXxlJob.Core
 {
     public class HessianObjectHelper
     {
-        
-        private static readonly Dictionary<string,Dictionary<string,PropertyInfo>> TransferObjCache 
+        private static readonly Dictionary<string, Dictionary<string, PropertyInfo>> TransferObjCache
             = new Dictionary<string, Dictionary<string, PropertyInfo>>();
-        private static readonly Dictionary<string,Type> TransferTypeCache 
+
+        private static readonly Dictionary<string, Type> TransferTypeCache
             = new Dictionary<string, Type>();
+
         static HessianObjectHelper()
         {
-        
             InitProperties(typeof(RpcRequest));
-            
+
             InitProperties(typeof(TriggerParam));
-            
+
             InitProperties(typeof(RpcResponse));
 
             InitProperties(typeof(ReturnT));
-            
+
             InitProperties(typeof(HandleCallbackParam));
-            
+
             InitProperties(typeof(JavaClass));
-            
+
             InitProperties(typeof(RegistryParam));
-            
+
             InitProperties(typeof(LogResult));
         }
+
         private static void InitProperties(Type type)
         {
             var propertyInfos = new Dictionary<string, PropertyInfo>();
@@ -43,7 +44,7 @@ namespace DotXxlJob.Core
             {
                 return;
             }
-            
+
             foreach (var property in typeInfo.DeclaredProperties)
             {
                 var attribute = property.GetCustomAttribute<DataMemberAttribute>();
@@ -58,13 +59,13 @@ namespace DotXxlJob.Core
                     continue;
                 }
 
-                propertyInfos.Add(attribute.Name,property);
+                propertyInfos.Add(attribute.Name, property);
             }
-            TransferTypeCache.Add(classAttr.Name,type);
-            TransferObjCache.Add(classAttr.Name,propertyInfos);
+            TransferTypeCache.Add(classAttr.Name, type);
+            TransferObjCache.Add(classAttr.Name, propertyInfos);
         }
 
-        public static object GetRealObjectValue(Deserializer deserializer,object value)
+        public static object GetRealObjectValue(Deserializer deserializer, object value)
         {
             if (value == null || IsSimpleType(value.GetType()))
             {
@@ -73,14 +74,14 @@ namespace DotXxlJob.Core
 
             if (value is HessianObject hessianObject)
             {
-                if(TransferObjCache.TryGetValue(hessianObject.TypeName,out var properties))
+                if (TransferObjCache.TryGetValue(hessianObject.TypeName, out var properties))
                 {
                     var instance = Activator.CreateInstance(TransferTypeCache[hessianObject.TypeName]);
                     foreach (var (k, v) in hessianObject)
                     {
                         if (properties.TryGetValue(k, out var p))
                         {
-                            p.SetValue(instance,GetRealObjectValue(deserializer,v));
+                            p.SetValue(instance, GetRealObjectValue(deserializer, v));
                         }
                     }
 
@@ -92,27 +93,28 @@ namespace DotXxlJob.Core
             {
                 return GetRealObjectValue(deserializer, deserializer.ReadValue());
             }
-            
+
             if (IsListType(value.GetType()))
             {
                 var listData = new List<object>();
-                
+
                 var cList = value as List<object>;
                 foreach (var cItem in cList)
                 {
-                   listData.Add(GetRealObjectValue(deserializer,cItem));
+                    listData.Add(GetRealObjectValue(deserializer, cItem));
                 }
 
                 return listData;
             }
-           
+
             throw new HessianException($"unknown item:{value.GetType()}");
         }
-        
+
         private static bool IsListType(Type type)
         {
-            return typeof(ICollection).IsAssignableFrom(type);          
+            return typeof(ICollection).IsAssignableFrom(type);
         }
+
         private static bool IsSimpleType(Type typeInfo)
         {
             if (typeInfo.IsValueType || typeInfo.IsEnum || typeInfo.IsPrimitive)
@@ -120,13 +122,12 @@ namespace DotXxlJob.Core
                 return true;
             }
 
-            if (typeof (string) == typeInfo)
+            if (typeof(string) == typeInfo)
             {
                 return true;
             }
 
             return false;
         }
-        
     }
 }

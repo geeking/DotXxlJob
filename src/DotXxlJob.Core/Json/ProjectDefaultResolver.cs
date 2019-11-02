@@ -10,18 +10,18 @@ namespace DotXxlJob.Core.Json
         public static IJsonFormatterResolver Instance = new ProjectDefaultResolver();
 
         // configure your resolver and formatters.
-        static readonly IJsonFormatter[] formatters = {
+        private static readonly IJsonFormatter[] formatters = {
             new DateTimeFormatter("yyyy-MM-dd HH:mm:ss"),
             new NullableDateTimeFormatter("yyyy-MM-dd HH:mm:ss")
         };
 
-        static readonly IJsonFormatterResolver[] resolvers = new[]
-        {           
+        private static readonly IJsonFormatterResolver[] resolvers = new[]
+        {
             EnumResolver.UnderlyingValue,
             StandardResolver.AllowPrivateExcludeNullSnakeCase
         };
 
-        ProjectDefaultResolver()
+        private ProjectDefaultResolver()
         {
         }
 
@@ -30,7 +30,7 @@ namespace DotXxlJob.Core.Json
             return FormatterCache<T>.formatter;
         }
 
-        static class FormatterCache<T>
+        private static class FormatterCache<T>
         {
             public static readonly IJsonFormatter<T> formatter;
 

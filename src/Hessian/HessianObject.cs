@@ -8,7 +8,7 @@ namespace Hessian
     public class HessianObject : IReadOnlyCollection<Tuple<string, object>>
     {
         private readonly string typeName;
-        private readonly IDictionary<string, object> fields; 
+        private readonly IDictionary<string, object> fields;
 
         public string TypeName => typeName;
 
@@ -36,8 +36,7 @@ namespace Hessian
         {
             private readonly HessianObject obj;
 
-            public HessianObject Object
-            {
+            public HessianObject Object {
                 get { return obj; }
             }
 

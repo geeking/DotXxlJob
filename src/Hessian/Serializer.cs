@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
@@ -12,12 +11,12 @@ namespace Hessian
 {
     public class Serializer
     {
-        static  readonly ConcurrentDictionary<Type,ClassElement> ClassDefCache =new ConcurrentDictionary<Type, ClassElement>();
-        
+        private static readonly ConcurrentDictionary<Type, ClassElement> ClassDefCache = new ConcurrentDictionary<Type, ClassElement>();
+
         private readonly Stream _stream;
         private readonly HessianSerializationContext _context;
 
-        public Serializer (Stream stream)
+        public Serializer(Stream stream)
         {
             this._stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _context = new HessianSerializationContext();
@@ -30,7 +29,7 @@ namespace Hessian
             {
                 classDef = GetClassDef(objectType.GetTypeInfo());
             }
-          
+
             var index = this._context.Instances.IndexOf(graph);
 
             if (index > -1)
@@ -109,7 +108,7 @@ namespace Hessian
             {
                 if (index == 1)
                 {
-                    WriteString("["+GetItemTypeName(item.GetType()));
+                    WriteString("[" + GetItemTypeName(item.GetType()));
                 }
                 WriteValue(item);
                 index++;
@@ -131,6 +130,7 @@ namespace Hessian
 
             return type.Name;
         }
+
         private void WriteSimpleValue(object val)
         {
             var valType = val.GetType();
@@ -138,68 +138,67 @@ namespace Hessian
             {
                 WriteInt32((int)val);
             }
-            else  if (valType == typeof(bool))
+            else if (valType == typeof(bool))
             {
                 WriteBoolean((bool)val);
             }
-            else  if (valType == typeof(long))
+            else if (valType == typeof(long))
             {
                 WriteInt64((long)val);
             }
-            else  if (valType == typeof(double))
+            else if (valType == typeof(double))
             {
                 WriteDouble((double)val);
             }
-            else  if (valType == typeof(string))
+            else if (valType == typeof(string))
             {
                 WriteString((string)val);
             }
-            else  if (valType == typeof(DateTime))
+            else if (valType == typeof(DateTime))
             {
                 WriteDateTime((DateTime)val);
             }
         }
-        
+
         private ClassElement GetClassDef(TypeInfo typeInfo)
         {
-          
-           var classAttr = typeInfo.GetCustomAttribute<DataContractAttribute>();
-           if (classAttr == null)
-           {
-               throw  new HessianException("DataContract must be set");
-           }
+            var classAttr = typeInfo.GetCustomAttribute<DataContractAttribute>();
+            if (classAttr == null)
+            {
+                throw new HessianException("DataContract must be set");
+            }
 
-           ClassElement ce = new ClassElement {ClassName = classAttr.Name, Fields = new List<PropertyElement>()};
+            ClassElement ce = new ClassElement { ClassName = classAttr.Name, Fields = new List<PropertyElement>() };
 
-           //ClassDef def = new ClassDef(classAttr.Name);
-           foreach (var property in typeInfo.DeclaredProperties)
-           {
-               var attribute = property.GetCustomAttribute<DataMemberAttribute>();
+            //ClassDef def = new ClassDef(classAttr.Name);
+            foreach (var property in typeInfo.DeclaredProperties)
+            {
+                var attribute = property.GetCustomAttribute<DataMemberAttribute>();
 
-               if (null == attribute)
-               {
-                   continue;
-               }
+                if (null == attribute)
+                {
+                    continue;
+                }
 
-               if (!property.CanRead || !property.CanWrite)
-               {
-                   continue;
-               }
-               PropertyElement p = new PropertyElement {
-                   Name = attribute.Name,
-                   Order =  attribute.Order,
-                   PropertyInfo = property
-               };
-               ce.Fields .Add( p );
-           }
-           ce.Fields.Sort(new PropertyComparer());
-           return ce;
+                if (!property.CanRead || !property.CanWrite)
+                {
+                    continue;
+                }
+                PropertyElement p = new PropertyElement {
+                    Name = attribute.Name,
+                    Order = attribute.Order,
+                    PropertyInfo = property
+                };
+                ce.Fields.Add(p);
+            }
+            ce.Fields.Sort(new PropertyComparer());
+            return ce;
         }
 
         /// <summary>
         /// Writes NULL token into stream
         /// </summary>
-        public  void WriteNull()
+        public void WriteNull()
         {
             this._stream.WriteByte(Marker.Null);
         }
@@ -208,7 +207,7 @@ namespace Hessian
         /// Writes <see cref="System.Boolean" /> value into output stream.
         /// </summary>
         /// <param name="value">The value.</param>
-        public  void WriteBoolean(bool value)
+        public void WriteBoolean(bool value)
         {
             this._stream.WriteByte(value ? Marker.True : Marker.False);
         }
@@ -228,7 +227,7 @@ namespace Hessian
             WriteBytes(buffer, 0, buffer.Length);
         }
 
-        public  void WriteBytes(byte[] buffer, int offset, int count)
+        public void WriteBytes(byte[] buffer, int offset, int count)
         {
             if (offset < 0)
             {
@@ -267,7 +266,7 @@ namespace Hessian
             this._stream.Write(buffer, offset, count);
         }
 
-        public  void WriteDateTime(DateTime value)
+        public void WriteDateTime(DateTime value)
         {
             if (value.Second == 0)
             {
@@ -295,7 +294,7 @@ namespace Hessian
             this._stream.WriteByte((byte)dt);
         }
 
-        public  void WriteDouble(double value)
+        public void WriteDouble(double value)
         {
             if (value.Equals(0.0d))
             {
@@ -335,7 +334,7 @@ namespace Hessian
 
             if (Single.MinValue <= value && value <= Single.MaxValue)
             {
-                var bytes = BitConverter.GetBytes((float) value);
+                var bytes = BitConverter.GetBytes((float)value);
 
                 this._stream.WriteByte(Marker.DoubleFloat);
 
@@ -353,11 +352,11 @@ namespace Hessian
 
             for (var index = 56; index >= 0; index -= 8)
             {
-                this._stream.WriteByte((byte) (temp >> index));
+                this._stream.WriteByte((byte)(temp >> index));
             }
         }
 
-        public  void WriteInt32(int value)
+        public void WriteInt32(int value)
         {
             if (-16 <= value && value < 48)
             {
@@ -384,7 +383,7 @@ namespace Hessian
             }
         }
 
-        public  void WriteInt64(long value)
+        public void WriteInt64(long value)
         {
             if (-8 <= value && value < 16)
             {
@@ -423,7 +422,7 @@ namespace Hessian
             }
         }
 
-        public  void WriteString(string value)
+        public void WriteString(string value)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -439,12 +438,12 @@ namespace Hessian
 
                 if (32 > length)
                 {
-                    this._stream.WriteByte((byte) length);
+                    this._stream.WriteByte((byte)length);
                 }
                 else
                 {
-                    this._stream.WriteByte((byte) (0x30 + (byte) (length >> 8)));
-                    this._stream.WriteByte((byte) length);
+                    this._stream.WriteByte((byte)(0x30 + (byte)(length >> 8)));
+                    this._stream.WriteByte((byte)length);
                 }
 
                 this._stream.Write(bytes, 0, bytes.Length);
@@ -470,17 +469,17 @@ namespace Hessian
                 position += count;
             }
         }
-      
-        public  void BeginClassDefinition()
+
+        public void BeginClassDefinition()
         {
             this._stream.WriteByte(Marker.ClassDefinition);
         }
 
-        public  void EndClassDefinition()
+        public void EndClassDefinition()
         {
         }
 
-        public  void WriteObjectReference(int index)
+        public void WriteObjectReference(int index)
         {
             if (index < 0x10)
             {
@@ -493,13 +492,12 @@ namespace Hessian
             }
         }
 
-        public  void WriteInstanceReference(int index)
+        public void WriteInstanceReference(int index)
         {
             this._stream.WriteByte(Marker.InstanceReference);
             WriteInt32(index);
         }
-        
-        
+
         private static bool IsSimpleType(TypeInfo typeInfo)
         {
             if (typeInfo.IsValueType || typeInfo.IsEnum || typeInfo.IsPrimitive)
@@ -507,7 +505,7 @@ namespace Hessian
                 return true;
             }
 
-            if (typeof (String) == typeInfo.AsType())
+            if (typeof(String) == typeInfo.AsType())
             {
                 return true;
             }
@@ -517,7 +515,7 @@ namespace Hessian
 
         private static bool IsListType(TypeInfo typeInfo)
         {
-            return typeof(ICollection).IsAssignableFrom(typeInfo);          
+            return typeof(ICollection).IsAssignableFrom(typeInfo);
         }
     }
 }

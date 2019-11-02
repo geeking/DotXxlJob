@@ -12,14 +12,15 @@ using Microsoft.Extensions.Options;
 
 namespace DotXxlJob.Core
 {
-    public class JobLogger:IJobLogger
+    public class JobLogger : IJobLogger
     {
         private readonly ILogger<JobLogger> _logger;
-        
+
         private readonly AsyncLocal<string> LogFileName = new AsyncLocal<string>();
 
         private readonly XxlJobExecutorOptions _options;
-        public JobLogger(IOptions<XxlJobExecutorOptions> optionsAccessor,ILogger<JobLogger> logger)
+
+        public JobLogger(IOptions<XxlJobExecutorOptions> optionsAccessor, ILogger<JobLogger> logger)
         {
             this._logger = logger;
             this._options = optionsAccessor.Value;
@@ -43,7 +44,6 @@ namespace DotXxlJob.Core
                 _logger.LogError(ex, "SetLogFileName error.");
             }
         }
-        
 
         public void Log(string pattern, params object[] format)
         {
@@ -60,7 +60,7 @@ namespace DotXxlJob.Core
             var callInfo = new StackTrace(true).GetFrame(1);
             LogDetail(GetLogFileName(), callInfo, appendLog);
         }
-        
+
         public void LogError(Exception ex)
         {
             var callInfo = new StackTrace(true).GetFrame(1);
@@ -114,18 +114,19 @@ namespace DotXxlJob.Core
             var content = string.Format(pattern, format);
             LogDetail(filePath, callInfo, content);
         }
-        
-        
+
         private string GetLogFileName()
         {
             return LogFileName.Value;
         }
+
         private string MakeLogFileName(long logDateTime, long logId)
         {
             //log fileName like: logPath/HandlerLogs/yyyy-MM-dd/9999.log
             return Path.Combine(this._options.LogPath, Constants.HandleLogsDirectory,
                 logDateTime.FromMilliseconds().ToString("yyyy-MM-dd"), $"{logId}.log");
         }
+
         private void LogDetail(string logFileName, StackFrame callInfo, string appendLog)
         {
             if (string.IsNullOrEmpty(logFileName))
@@ -141,7 +142,7 @@ namespace DotXxlJob.Core
                 .Append("[thread " + Thread.CurrentThread.ManagedThreadId + "]").Append(" ")
                 .Append(appendLog ?? string.Empty)
                 .AppendLine();
-            
+
             var formatAppendLog = stringBuffer.ToString();
 
             try
@@ -153,7 +154,7 @@ namespace DotXxlJob.Core
                 this._logger.LogError(ex, "LogDetail error");
             }
         }
-        
+
         private void CleanOldLogs()
         {
             if (this._options.LogRetentionDays <= 0)
@@ -189,6 +190,5 @@ namespace DotXxlJob.Core
                 }
             });
         }
-
     }
 }

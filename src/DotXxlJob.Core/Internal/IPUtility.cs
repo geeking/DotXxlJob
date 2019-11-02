@@ -9,24 +9,29 @@ namespace DotXxlJob.Core
     /// <summary>
     /// ip utility
     /// </summary>
-    internal static  class IPUtility
+    internal static class IPUtility
     {
         #region Private Members
+
         /// <summary>
         /// A类: 10.0.0.0-10.255.255.255
         /// </summary>
         private static long ipABegin, ipAEnd;
+
         /// <summary>
-        /// B类: 172.16.0.0-172.31.255.255   
+        /// B类: 172.16.0.0-172.31.255.255
         /// </summary>
         private static long ipBBegin, ipBEnd;
+
         /// <summary>
         /// C类: 192.168.0.0-192.168.255.255
         /// </summary>
         private static long ipCBegin, ipCEnd;
-        #endregion
+
+        #endregion Private Members
 
         #region Constructors
+
         /// <summary>
         /// static new
         /// </summary>
@@ -41,9 +46,11 @@ namespace DotXxlJob.Core
             ipCBegin = ConvertToNumber("192.168.0.0");
             ipCEnd = ConvertToNumber("192.168.255.255");
         }
-        #endregion
+
+        #endregion Constructors
 
         #region Public Methods
+
         /// <summary>
         /// ip address convert to long
         /// </summary>
@@ -53,6 +60,7 @@ namespace DotXxlJob.Core
         {
             return ConvertToNumber(IPAddress.Parse(ipAddress));
         }
+
         /// <summary>
         /// ip address convert to long
         /// </summary>
@@ -63,6 +71,7 @@ namespace DotXxlJob.Core
             var bytes = ipAddress.GetAddressBytes();
             return bytes[0] * 256 * 256 * 256 + bytes[1] * 256 * 256 + bytes[2] * 256 + bytes[3];
         }
+
         /// <summary>
         /// true表示为内网IP
         /// </summary>
@@ -72,6 +81,7 @@ namespace DotXxlJob.Core
         {
             return IsIntranet(ConvertToNumber(ipAddress));
         }
+
         /// <summary>
         /// true表示为内网IP
         /// </summary>
@@ -81,6 +91,7 @@ namespace DotXxlJob.Core
         {
             return IsIntranet(ConvertToNumber(ipAddress));
         }
+
         /// <summary>
         /// true表示为内网IP
         /// </summary>
@@ -92,36 +103,38 @@ namespace DotXxlJob.Core
                     (longIP >= ipBBegin) && (longIP <= ipBEnd) ||
                     (longIP >= ipCBegin) && (longIP <= ipCEnd));
         }
+
         /// <summary>
         /// 获取本机内网IP
         /// </summary>
         /// <returns></returns>
         public static IPAddress GetLocalIntranetIP()
         {
-           return NetworkInterface
-            .GetAllNetworkInterfaces()
-            .Select(p => p.GetIPProperties())
-            .SelectMany(p => 
-                p.UnicastAddresses
-            ).FirstOrDefault(p => p.Address.AddressFamily == AddressFamily.InterNetwork 
-                                  && !IPAddress.IsLoopback(p.Address)
-                                  && IsIntranet(p.Address))?.Address;
+            return NetworkInterface
+             .GetAllNetworkInterfaces()
+             .Select(p => p.GetIPProperties())
+             .SelectMany(p =>
+                 p.UnicastAddresses
+             ).FirstOrDefault(p => p.Address.AddressFamily == AddressFamily.InterNetwork
+                                   && !IPAddress.IsLoopback(p.Address)
+                                   && IsIntranet(p.Address))?.Address;
         }
+
         /// <summary>
         /// 获取本机内网IP列表
         /// </summary>
         /// <returns></returns>
         public static List<IPAddress> GetLocalIntranetIPList()
         {
-            var infList =NetworkInterface.GetAllNetworkInterfaces()
+            var infList = NetworkInterface.GetAllNetworkInterfaces()
             .Select(p => p.GetIPProperties())
             .SelectMany(p => p.UnicastAddresses)
-            .Where(p => 
-                p.Address.AddressFamily == AddressFamily.InterNetwork 
+            .Where(p =>
+                p.Address.AddressFamily == AddressFamily.InterNetwork
                 && !IPAddress.IsLoopback(p.Address)
-                && IsIntranet(p.Address)            
+                && IsIntranet(p.Address)
             );
-                     
+
             var result = new List<IPAddress>();
             foreach (var child in infList)
             {
@@ -130,6 +143,7 @@ namespace DotXxlJob.Core
 
             return result;
         }
-        #endregion
+
+        #endregion Public Methods
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.NetworkInformation;
 using System.Text;
 
 using Hessian.Collections;
@@ -14,15 +13,16 @@ namespace Hessian
         private readonly ValueReader reader;
         private readonly IRefMap<ClassDef> classDefs;
         private readonly IRefMap<object> objectRefs;
-        private readonly IRefMap<string> typeNameRefs; 
+        private readonly IRefMap<string> typeNameRefs;
         private readonly Lazy<ListTypeResolver> listTypeResolver = new Lazy<ListTypeResolver>();
-        private readonly Lazy<DictionaryTypeResolver> dictTypeResolver = new Lazy<DictionaryTypeResolver>(); 
+        private readonly Lazy<DictionaryTypeResolver> dictTypeResolver = new Lazy<DictionaryTypeResolver>();
 
         private static readonly EndianBitConverter BitConverter = new BigEndianBitConverter();
 
-        public Deserializer (Stream stream)
+        public Deserializer(Stream stream)
         {
-            if (stream == null) {
+            if (stream == null)
+            {
                 throw new ArgumentNullException(nameof(stream));
             }
 
@@ -32,46 +32,102 @@ namespace Hessian
             typeNameRefs = new ListRefMap<string>();
         }
 
-
         public bool CanRead()
         {
-            var tag = reader.Peek ();
+            var tag = reader.Peek();
             return tag.HasValue;
         }
-        
+
         #region ReadValue
 
-        public object ReadValue ()
+        public object ReadValue()
         {
-            var tag = reader.Peek ();
+            var tag = reader.Peek();
 
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
             //Console.WriteLine("------------ 0x{0:x2}----------------",tag.Value);
-          
-            switch (tag.Value) {
-                case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x05: case 0x06: case 0x07:
-                case 0x08: case 0x09: case 0x0A: case 0x0B: case 0x0C: case 0x0D: case 0x0E: case 0x0F:
-                case 0x10: case 0x11: case 0x12: case 0x13: case 0x14: case 0x15: case 0x16: case 0x17:
-                case 0x18: case 0x19: case 0x1A: case 0x1B: case 0x1C: case 0x1D: case 0x1E: case 0x1F:
+
+            switch (tag.Value)
+            {
+                case 0x00:
+                case 0x01:
+                case 0x02:
+                case 0x03:
+                case 0x04:
+                case 0x05:
+                case 0x06:
+                case 0x07:
+                case 0x08:
+                case 0x09:
+                case 0x0A:
+                case 0x0B:
+                case 0x0C:
+                case 0x0D:
+                case 0x0E:
+                case 0x0F:
+                case 0x10:
+                case 0x11:
+                case 0x12:
+                case 0x13:
+                case 0x14:
+                case 0x15:
+                case 0x16:
+                case 0x17:
+                case 0x18:
+                case 0x19:
+                case 0x1A:
+                case 0x1B:
+                case 0x1C:
+                case 0x1D:
+                case 0x1E:
+                case 0x1F:
                     //Console.WriteLine("ReadShortString");
                     return ReadShortString();
-               
-                case 0x20: case 0x21: case 0x22: case 0x23: case 0x24: case 0x25: case 0x26: case 0x27:
-                case 0x28: case 0x29: case 0x2A: case 0x2B: case 0x2C: case 0x2D: case 0x2E: case 0x2F:
+
+                case 0x20:
+                case 0x21:
+                case 0x22:
+                case 0x23:
+                case 0x24:
+                case 0x25:
+                case 0x26:
+                case 0x27:
+                case 0x28:
+                case 0x29:
+                case 0x2A:
+                case 0x2B:
+                case 0x2C:
+                case 0x2D:
+                case 0x2E:
+                case 0x2F:
                     //Console.WriteLine("ReadShortBinary");
                     return ReadShortBinary();
 
-                case 0x30: case 0x31: case 0x32: case 0x33:
+                case 0x30:
+                case 0x31:
+                case 0x32:
+                case 0x33:
                     //Console.WriteLine("ReadMediumString");
                     return ReadMediumString();
 
-                case 0x34: case 0x35: case 0x36: case 0x37:
+                case 0x34:
+                case 0x35:
+                case 0x36:
+                case 0x37:
                     //Console.WriteLine("ReadMediumBinary");
                     return ReadMediumBinary();
 
-                case 0x38: case 0x39: case 0x3A: case 0x3B: case 0x3C: case 0x3D: case 0x3E: case 0x3F:
+                case 0x38:
+                case 0x39:
+                case 0x3A:
+                case 0x3B:
+                case 0x3C:
+                case 0x3D:
+                case 0x3E:
+                case 0x3F:
                     //Console.WriteLine("ReadLongThreeBytes");
                     return ReadLongThreeBytes();
 
@@ -79,7 +135,8 @@ namespace Hessian
                     //Console.WriteLine("Reserved");
                     return Reserved();
 
-                case 0x41: case 0x42:
+                case 0x41:
+                case 0x42:
                     //Console.WriteLine("ReadChunkedBinary");
                     return ReadChunkedBinary();
 
@@ -143,7 +200,8 @@ namespace Hessian
                     //Console.WriteLine("ReadRef");
                     return ReadRef();
 
-                case 0x52: case 0x53:
+                case 0x52:
+                case 0x53:
                     //Console.WriteLine("ReadChunkedString");
                     return ReadChunkedString();
 
@@ -175,7 +233,8 @@ namespace Hessian
                     // List terminator - solitary list terminators are most definitely not legit.
                     throw new UnexpectedTagException(0x5A, "value");
 
-                case 0x5B: case 0x5C:
+                case 0x5B:
+                case 0x5C:
                     //Console.WriteLine("ReadDoubleOneByte");
                     return ReadDoubleOneByte();
 
@@ -191,47 +250,187 @@ namespace Hessian
                     //Console.WriteLine("ReadDoubleFourBytes");
                     return ReadDoubleFourBytes();
 
-                case 0x60: case 0x61: case 0x62: case 0x63: case 0x64: case 0x65: case 0x66: case 0x67:
-                case 0x68: case 0x69: case 0x6A: case 0x6B: case 0x6C: case 0x6D: case 0x6E: case 0x6F:
+                case 0x60:
+                case 0x61:
+                case 0x62:
+                case 0x63:
+                case 0x64:
+                case 0x65:
+                case 0x66:
+                case 0x67:
+                case 0x68:
+                case 0x69:
+                case 0x6A:
+                case 0x6B:
+                case 0x6C:
+                case 0x6D:
+                case 0x6E:
+                case 0x6F:
                     //Console.WriteLine("ReadObjectCompact");
                     return ReadObjectCompact();
 
-                case 0x70: case 0x71: case 0x72: case 0x73: case 0x74: case 0x75: case 0x76: case 0x77:
+                case 0x70:
+                case 0x71:
+                case 0x72:
+                case 0x73:
+                case 0x74:
+                case 0x75:
+                case 0x76:
+                case 0x77:
                     //Console.WriteLine("ReadCompactFixList");
                     return ReadCompactFixList();
 
-                case 0x78: case 0x79: case 0x7A: case 0x7B: case 0x7C: case 0x7D: case 0x7E: case 0x7F:
+                case 0x78:
+                case 0x79:
+                case 0x7A:
+                case 0x7B:
+                case 0x7C:
+                case 0x7D:
+                case 0x7E:
+                case 0x7F:
                     //Console.WriteLine("ReadCompactFixListUntyped");
                     return ReadCompactFixListUntyped();
 
-                case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: case 0x85: case 0x86: case 0x87:
-                case 0x88: case 0x89: case 0x8A: case 0x8B: case 0x8C: case 0x8D: case 0x8E: case 0x8F:
-                case 0x90: case 0x91: case 0x92: case 0x93: case 0x94: case 0x95: case 0x96: case 0x97:
-                case 0x98: case 0x99: case 0x9A: case 0x9B: case 0x9C: case 0x9D: case 0x9E: case 0x9F:
-                case 0xA0: case 0xA1: case 0xA2: case 0xA3: case 0xA4: case 0xA5: case 0xA6: case 0xA7:
-                case 0xA8: case 0xA9: case 0xAA: case 0xAB: case 0xAC: case 0xAD: case 0xAE: case 0xAF:
-                case 0xB0: case 0xB1: case 0xB2: case 0xB3: case 0xB4: case 0xB5: case 0xB6: case 0xB7:
-                case 0xB8: case 0xB9: case 0xBA: case 0xBB: case 0xBC: case 0xBD: case 0xBE: case 0xBF:
+                case 0x80:
+                case 0x81:
+                case 0x82:
+                case 0x83:
+                case 0x84:
+                case 0x85:
+                case 0x86:
+                case 0x87:
+                case 0x88:
+                case 0x89:
+                case 0x8A:
+                case 0x8B:
+                case 0x8C:
+                case 0x8D:
+                case 0x8E:
+                case 0x8F:
+                case 0x90:
+                case 0x91:
+                case 0x92:
+                case 0x93:
+                case 0x94:
+                case 0x95:
+                case 0x96:
+                case 0x97:
+                case 0x98:
+                case 0x99:
+                case 0x9A:
+                case 0x9B:
+                case 0x9C:
+                case 0x9D:
+                case 0x9E:
+                case 0x9F:
+                case 0xA0:
+                case 0xA1:
+                case 0xA2:
+                case 0xA3:
+                case 0xA4:
+                case 0xA5:
+                case 0xA6:
+                case 0xA7:
+                case 0xA8:
+                case 0xA9:
+                case 0xAA:
+                case 0xAB:
+                case 0xAC:
+                case 0xAD:
+                case 0xAE:
+                case 0xAF:
+                case 0xB0:
+                case 0xB1:
+                case 0xB2:
+                case 0xB3:
+                case 0xB4:
+                case 0xB5:
+                case 0xB6:
+                case 0xB7:
+                case 0xB8:
+                case 0xB9:
+                case 0xBA:
+                case 0xBB:
+                case 0xBC:
+                case 0xBD:
+                case 0xBE:
+                case 0xBF:
                     //Console.WriteLine("ReadIntegerSingleByte");
                     return ReadIntegerSingleByte();
 
-                case 0xC0: case 0xC1: case 0xC2: case 0xC3: case 0xC4: case 0xC5: case 0xC6: case 0xC7:
-                case 0xC8: case 0xC9: case 0xCA: case 0xCB: case 0xCC: case 0xCD: case 0xCE: case 0xCF:
+                case 0xC0:
+                case 0xC1:
+                case 0xC2:
+                case 0xC3:
+                case 0xC4:
+                case 0xC5:
+                case 0xC6:
+                case 0xC7:
+                case 0xC8:
+                case 0xC9:
+                case 0xCA:
+                case 0xCB:
+                case 0xCC:
+                case 0xCD:
+                case 0xCE:
+                case 0xCF:
                     //Console.WriteLine("ReadIntegerTwoBytes");
                     return ReadIntegerTwoBytes();
 
-                case 0xD0: case 0xD1: case 0xD2: case 0xD3: case 0xD4: case 0xD5: case 0xD6: case 0xD7:
+                case 0xD0:
+                case 0xD1:
+                case 0xD2:
+                case 0xD3:
+                case 0xD4:
+                case 0xD5:
+                case 0xD6:
+                case 0xD7:
                     //Console.WriteLine("ReadIntegerThreeBytes");
                     return ReadIntegerThreeBytes();
 
-                case 0xD8: case 0xD9: case 0xDA: case 0xDB: case 0xDC: case 0xDD: case 0xDE: case 0xDF:
-                case 0xE0: case 0xE1: case 0xE2: case 0xE3: case 0xE4: case 0xE5: case 0xE6: case 0xE7:
-                case 0xE8: case 0xE9: case 0xEA: case 0xEB: case 0xEC: case 0xED: case 0xEE: case 0xEF:
+                case 0xD8:
+                case 0xD9:
+                case 0xDA:
+                case 0xDB:
+                case 0xDC:
+                case 0xDD:
+                case 0xDE:
+                case 0xDF:
+                case 0xE0:
+                case 0xE1:
+                case 0xE2:
+                case 0xE3:
+                case 0xE4:
+                case 0xE5:
+                case 0xE6:
+                case 0xE7:
+                case 0xE8:
+                case 0xE9:
+                case 0xEA:
+                case 0xEB:
+                case 0xEC:
+                case 0xED:
+                case 0xEE:
+                case 0xEF:
                     //Console.WriteLine("ReadLongOneByte");
                     return ReadLongOneByte();
 
-                case 0xF0: case 0xF1: case 0xF2: case 0xF3: case 0xF4: case 0xF5: case 0xF6: case 0xF7:
-                case 0xF8: case 0xF9: case 0xFA: case 0xFB: case 0xFC: case 0xFD: case 0xFE: case 0xFF:
+                case 0xF0:
+                case 0xF1:
+                case 0xF2:
+                case 0xF3:
+                case 0xF4:
+                case 0xF5:
+                case 0xF6:
+                case 0xF7:
+                case 0xF8:
+                case 0xF9:
+                case 0xFA:
+                case 0xFB:
+                case 0xFC:
+                case 0xFD:
+                case 0xFE:
+                case 0xFF:
                     //Console.WriteLine("ReadLongTwoBytes");
                     return ReadLongTwoBytes();
             }
@@ -239,13 +438,14 @@ namespace Hessian
             throw new Exception("WTF: byte value " + tag.Value + " not accounted for!");
         }
 
-        #endregion
+        #endregion ReadValue
 
         private string ReadTypeName()
         {
             var tag = reader.Peek();
 
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
 
@@ -254,7 +454,8 @@ namespace Hessian
             if ((tag >= 0x00 && tag < 0x20)
                 || (tag >= 0x30 && tag < 0x34)
                 || tag == 0x52
-                || tag == 0x53) {
+                || tag == 0x53)
+            {
                 var typeName = ReadString();
                 //Console.WriteLine("Type={0}",typeName);
                 typeNameRefs.Add(typeName);
@@ -315,9 +516,12 @@ namespace Hessian
 
             objectRefs.Add(list);
 
-            if (length.HasValue) {
+            if (length.HasValue)
+            {
                 PopulateFixLengthList(list, length.Value);
-            } else {
+            }
+            else
+            {
                 PopulateVarList(list);
             }
             return list;
@@ -327,12 +531,17 @@ namespace Hessian
         {
             IList<object> list;
 
-            if (length.HasValue) {
-                if (!listTypeResolver.Value.TryGetListInstance(type, length.Value, out list)) {
+            if (length.HasValue)
+            {
+                if (!listTypeResolver.Value.TryGetListInstance(type, length.Value, out list))
+                {
                     list = new List<object>(length.Value);
                 }
-            } else {
-                if (!listTypeResolver.Value.TryGetListInstance(type, out list)) {
+            }
+            else
+            {
+                if (!listTypeResolver.Value.TryGetListInstance(type, out list))
+                {
                     list = new List<object>();
                 }
             }
@@ -351,18 +560,19 @@ namespace Hessian
                 switch (obj)
                 {
                     case ClassDef _:
-                    {
-                        var rVal = ReadValue() as HessianObject; // 真实的数据
-                        if (rVal == null)
                         {
-                            throw  new HessianException("decode error");
+                            var rVal = ReadValue() as HessianObject; // 真实的数据
+                            if (rVal == null)
+                            {
+                                throw new HessianException("decode error");
+                            }
+                            list.Add(ReadRealObject(rVal));
+                            break;
                         }
-                        list.Add(ReadRealObject(rVal));
-                        break;
-                    }
                     case HessianObject vObj:
                         list.Add(ReadRealObject(vObj));
                         break;
+
                     default:
                         list.Add(obj);
                         break;
@@ -372,21 +582,21 @@ namespace Hessian
 
         private HessianObject ReadRealObject(HessianObject hessianObject)
         {
-            var builder =  HessianObject.Builder.New(hessianObject.TypeName);
-            foreach (var (k,v) in hessianObject)
+            var builder = HessianObject.Builder.New(hessianObject.TypeName);
+            foreach (var (k, v) in hessianObject)
             {
                 if (v is ClassDef)
                 {
                     if (!(ReadValue() is HessianObject rVal))
                     {
-                        throw  new HessianException("decode error");
+                        throw new HessianException("decode error");
                     }
 
-                    builder.Add(k,ReadRealObject(rVal));
+                    builder.Add(k, ReadRealObject(rVal));
                 }
-                else if(v is HessianObject vObj)
+                else if (v is HessianObject vObj)
                 {
-                    builder.Add(k,ReadRealObject(vObj));
+                    builder.Add(k, ReadRealObject(vObj));
                 }
                 else
                 {
@@ -399,12 +609,15 @@ namespace Hessian
 
         private void PopulateVarList(IList<object> list)
         {
-            while (true) {
+            while (true)
+            {
                 var tag = reader.Peek();
-                if (!tag.HasValue) {
+                if (!tag.HasValue)
+                {
                     throw new EndOfStreamException();
                 }
-                if (tag == 'Z') {
+                if (tag == 'Z')
+                {
                     reader.ReadByte();
                     break;
                 }
@@ -412,9 +625,9 @@ namespace Hessian
             }
         }
 
-        #endregion
+        #endregion List
 
-        public object Reserved ()
+        public object Reserved()
         {
             reader.ReadByte();
             return ReadValue();
@@ -426,43 +639,48 @@ namespace Hessian
         {
             var tag = reader.Peek();
 
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
 
-            if (tag.Value < 0x20) {
+            if (tag.Value < 0x20)
+            {
                 return ReadShortString();
             }
 
-            if (tag.Value >= 0x30 && tag.Value <= 0x33) {
+            if (tag.Value >= 0x30 && tag.Value <= 0x33)
+            {
                 return ReadMediumString();
             }
 
-            if (tag.Value == 'R' || tag.Value == 'S') {
+            if (tag.Value == 'R' || tag.Value == 'S')
+            {
                 return ReadChunkedString();
             }
 
             throw new UnexpectedTagException(tag.Value, "string");
         }
 
-        private string ReadShortString ()
+        private string ReadShortString()
         {
             var length = reader.ReadByte();
             return ReadStringWithLength(length);
         }
 
-        private string ReadMediumString ()
+        private string ReadMediumString()
         {
-            var b0 = reader.ReadByte ();
-            var b1 = reader.ReadByte ();
+            var b0 = reader.ReadByte();
+            var b1 = reader.ReadByte();
             var length = ((b0 - 0x30) << 8) | b1;
             return ReadStringWithLength(length);
         }
 
-        private string ReadStringWithLength (int length)
+        private string ReadStringWithLength(int length)
         {
-            var sb = new StringBuilder (length);
-            while (length-- > 0) {
+            var sb = new StringBuilder(length);
+            while (length-- > 0)
+            {
                 sb.AppendCodepoint(reader.ReadUtf8Codepoint());
             }
             return sb.ToString();
@@ -473,11 +691,13 @@ namespace Hessian
             var sb = new StringBuilder();
             var final = false;
 
-            while (!final) {
+            while (!final)
+            {
                 var tag = reader.ReadByte();
                 final = tag == 'S';
                 var length = reader.ReadShort();
-                while (length-- > 0) {
+                while (length-- > 0)
+                {
                     sb.AppendCodepoint(reader.ReadUtf8Codepoint());
                 }
             }
@@ -485,33 +705,37 @@ namespace Hessian
             return sb.ToString();
         }
 
-        #endregion
+        #endregion String
 
         #region Binary
 
         public byte[] ReadBinary()
         {
             var tag = reader.Peek();
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
 
-            if (tag.Value >= 0x20 && tag.Value <= 0x2F) {
+            if (tag.Value >= 0x20 && tag.Value <= 0x2F)
+            {
                 return ReadShortBinary();
             }
 
-            if (tag.Value >= 0x34 && tag.Value <= 0x37) {
+            if (tag.Value >= 0x34 && tag.Value <= 0x37)
+            {
                 return ReadMediumBinary();
             }
 
-            if (tag.Value == 0x41 || tag.Value == 0x42) {
+            if (tag.Value == 0x41 || tag.Value == 0x42)
+            {
                 return ReadChunkedBinary();
             }
 
             throw new UnexpectedTagException(tag.Value, "binary");
         }
 
-        private byte[] ReadShortBinary ()
+        private byte[] ReadShortBinary()
         {
             var length = reader.ReadByte();
             var data = new byte[length];
@@ -534,7 +758,8 @@ namespace Hessian
             var data = new List<byte>();
             var final = false;
 
-            while (!final) {
+            while (!final)
+            {
                 var tag = reader.ReadByte();
                 final = tag == 'B';
                 var length = reader.ReadShort();
@@ -554,27 +779,32 @@ namespace Hessian
         {
             var tag = reader.Peek();
 
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
 
             // Full-length integer encoding is 'I' b0 b1 b2 b3 - i.e. a full 32-bit integer in big-endian order.
-            if (tag == 0x49) {
+            if (tag == 0x49)
+            {
                 return ReadIntegerFull();
             }
 
             // Ints between -16 and 47 are encoded as value + 0x90.
-            if (tag >= 0x80 && tag <= 0xBF) {
+            if (tag >= 0x80 && tag <= 0xBF)
+            {
                 return ReadIntegerSingleByte();
             }
 
             // Ints between -2048 and 2047 can be encoded as two octets with the leading byte from 0xC0 to 0xCF.
-            if (tag >= 0xC0 && tag <= 0xCF) {
+            if (tag >= 0xC0 && tag <= 0xCF)
+            {
                 return ReadIntegerTwoBytes();
             }
 
             // Ints between -262144 and 262143 can be three bytes with the first from 0xD0 to 0xD7.
-            if (tag >= 0xD0 && tag <= 0xD7) {
+            if (tag >= 0xD0 && tag <= 0xD7)
+            {
                 return ReadIntegerThreeBytes();
             }
 
@@ -621,18 +851,20 @@ namespace Hessian
         public ClassDef ReadClassDefinition()
         {
             var tag = reader.ReadByte();
-            if (tag != 'C') {
+            if (tag != 'C')
+            {
                 throw new UnexpectedTagException(tag, "classdef");
             }
             var name = ReadString();
             var fieldCount = ReadInteger();
             var fields = new string[fieldCount];
-            for (var i = 0; i < fields.Length; ++i) {
+            for (var i = 0; i < fields.Length; ++i)
+            {
                 fields[i] = ReadString();
             }
 
             var classDef = new ClassDef(name, fields);
-            
+
             classDefs.Add(classDef);
 
             return classDef;
@@ -646,27 +878,33 @@ namespace Hessian
         {
             var tag = reader.Peek();
 
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
 
-            if (tag == 0x44) {
+            if (tag == 0x44)
+            {
                 return ReadFullDouble();
             }
 
-            if (tag == 0x5B || tag == 0x5C) {
+            if (tag == 0x5B || tag == 0x5C)
+            {
                 return ReadDoubleOneByte();
             }
 
-            if (tag == 0x5D) {
+            if (tag == 0x5D)
+            {
                 return ReadDoubleTwoBytes();
             }
 
-            if (tag == 0x5E) {
+            if (tag == 0x5E)
+            {
                 return ReadDoubleThreeBytes();
             }
 
-            if (tag == 0x5F) {
+            if (tag == 0x5F)
+            {
                 return ReadDoubleFourBytes();
             }
 
@@ -692,7 +930,7 @@ namespace Hessian
             // encoded as single bytes.  Java bytes are signed, .NET bytes aren't,
             // so we have to cast it first.
             reader.ReadByte();
-            return (sbyte) reader.ReadByte();
+            return (sbyte)reader.ReadByte();
         }
 
         private double ReadDoubleThreeBytes()
@@ -717,7 +955,8 @@ namespace Hessian
         {
             var tag = reader.ReadByte();
 
-            switch (tag) {
+            switch (tag)
+            {
                 case 0x46: return false;
                 case 0x54: return true;
             }
@@ -731,15 +970,18 @@ namespace Hessian
         {
             var tag = reader.Peek();
 
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
 
-            if (tag == 0x4A) {
+            if (tag == 0x4A)
+            {
                 return ReadDateInMillis();
             }
 
-            if (tag == 0x4B) {
+            if (tag == 0x4B)
+            {
                 return ReadDateInMinutes();
             }
 
@@ -770,27 +1012,33 @@ namespace Hessian
         {
             var tag = reader.Peek();
 
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
 
-            if (tag == 0x4C) {
+            if (tag == 0x4C)
+            {
                 return ReadLongFull();
             }
 
-            if (tag >= 0xD8 && tag <= 0xEF) {
+            if (tag >= 0xD8 && tag <= 0xEF)
+            {
                 return ReadLongOneByte();
             }
 
-            if (tag >= 0xF0 && tag <= 0xFF) {
+            if (tag >= 0xF0 && tag <= 0xFF)
+            {
                 return ReadLongTwoBytes();
             }
 
-            if (tag >= 0x38 && tag <= 0x3F) {
+            if (tag >= 0x38 && tag <= 0x3F)
+            {
                 return ReadLongThreeBytes();
             }
 
-            if (tag == 0x59) {
+            if (tag == 0x59)
+            {
                 return ReadLongFourBytes();
             }
 
@@ -800,15 +1048,11 @@ namespace Hessian
         private long ReadLongFull()
         {
             var data = new byte[9];
-            
-            
+
             reader.Read(data, data.Length);
             return LongFromBytes(data, 1);
-            
         }
-    
-    
-        
+
         private long ReadLongOneByte()
         {
             return reader.ReadByte() - 0xE0;
@@ -846,15 +1090,18 @@ namespace Hessian
         {
             var tag = reader.Peek();
 
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
 
-            if (tag == 'H') {
+            if (tag == 'H')
+            {
                 return ReadUntypedMap();
             }
 
-            if (tag == 'M') {
+            if (tag == 'M')
+            {
                 return ReadTypedMap();
             }
 
@@ -877,19 +1124,23 @@ namespace Hessian
         private IDictionary<object, object> ReadMapCore(string type = null)
         {
             IDictionary<object, object> dictionary;
-            if (type == null || !dictTypeResolver.Value.TryGetInstance("", out dictionary)) {
+            if (type == null || !dictTypeResolver.Value.TryGetInstance("", out dictionary))
+            {
                 dictionary = new Dictionary<object, object>();
             }
 
             objectRefs.Add(dictionary);
 
-            while (true) {
+            while (true)
+            {
                 var tag = reader.Peek();
 
-                if (!tag.HasValue) {
+                if (!tag.HasValue)
+                {
                     throw new EndOfStreamException();
                 }
-                if (tag == 'Z') {
+                if (tag == 'Z')
+                {
                     break;
                 }
 
@@ -901,7 +1152,7 @@ namespace Hessian
             return dictionary;
         }
 
-        #endregion
+        #endregion Dictionary/Map
 
         #region Object
 
@@ -909,15 +1160,18 @@ namespace Hessian
         {
             var tag = reader.Peek();
 
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
 
-            if (tag == 'O') {
+            if (tag == 'O')
+            {
                 return ReadObjectFull();
             }
 
-            if (tag >= 0x60 && tag < 0x70) {
+            if (tag >= 0x60 && tag < 0x70)
+            {
                 return ReadObjectCompact();
             }
 
@@ -946,14 +1200,15 @@ namespace Hessian
             var builder = HessianObject.Builder.New(classDef.Name);
             objectRefs.Add(builder.Object);
 
-            foreach (var field in classDef.Fields) {
+            foreach (var field in classDef.Fields)
+            {
                 builder.Add(field, ReadValue());
             }
 
             return builder.Create();
         }
 
-        #endregion
+        #endregion Object
 
         public object ReadNull()
         {
@@ -964,15 +1219,17 @@ namespace Hessian
         public object ReadRef()
         {
             var tag = reader.Peek();
-            if (!tag.HasValue) {
+            if (!tag.HasValue)
+            {
                 throw new EndOfStreamException();
             }
-            if (tag != 0x51) {
+            if (tag != 0x51)
+            {
                 throw new UnexpectedTagException(tag.Value, "ref");
             }
 
             reader.ReadByte();//过滤tag
-            
+
             return objectRefs.Get(ReadInteger());
         }
 
@@ -999,7 +1256,7 @@ namespace Hessian
 
             return value;
             */
-            return ((long)buffer[offset + 0] << 0x38) 
+            return ((long)buffer[offset + 0] << 0x38)
                    + ((long)buffer[offset + 1] << 0x30)
                    | ((long)buffer[offset + 2] << 0x28)
                    | ((long)buffer[offset + 3] << 0x20)
@@ -1007,9 +1264,6 @@ namespace Hessian
                    | ((long)buffer[offset + 5] << 0x10)
                    | ((long)buffer[offset + 6] << 0x08)
                    | ((uint)buffer[offset + 7] << 0x00);
-            
-         
         }
     }
 }
-

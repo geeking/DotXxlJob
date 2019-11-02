@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using DotXxlJob.Core;
@@ -14,6 +13,7 @@ namespace ASPNetCoreExecutor
         private readonly RequestDelegate _next;
 
         private readonly XxlRpcServiceHandler _rpcService;
+
         public XxlJobExecutorMiddleware(IServiceProvider provider, RequestDelegate next)
         {
             this._provider = provider;
@@ -21,20 +21,18 @@ namespace ASPNetCoreExecutor
             this._rpcService = _provider.GetRequiredService<XxlRpcServiceHandler>();
         }
 
-
         public async Task Invoke(HttpContext context)
         {
-
-            if ("POST".Equals(context.Request.Method, StringComparison.OrdinalIgnoreCase) )
+            if ("POST".Equals(context.Request.Method, StringComparison.OrdinalIgnoreCase))
             {
-                var rsp =  await _rpcService.HandlerAsync(context.Request.Body);
+                var rsp = await _rpcService.HandlerAsync(context.Request.Body);
 
-                context.Response.StatusCode = (int) HttpStatusCode.OK;
+                context.Response.StatusCode = (int)HttpStatusCode.OK;
                 context.Response.ContentType = "text/plain;utf-8";
-                await context.Response.Body.WriteAsync(rsp,0,rsp.Length);
+                await context.Response.Body.WriteAsync(rsp, 0, rsp.Length);
                 return;
             }
-            
+
             await _next.Invoke(context);
         }
     }

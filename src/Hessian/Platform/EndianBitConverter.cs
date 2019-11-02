@@ -15,47 +15,47 @@ namespace Hessian.Platform
 
         public byte[] GetBytes(char value)
         {
-            return GetBytes(value, sizeof (char));
+            return GetBytes(value, sizeof(char));
         }
 
         public byte[] GetBytes(short value)
         {
-            return GetBytes(value, sizeof (short));
+            return GetBytes(value, sizeof(short));
         }
 
         public byte[] GetBytes(ushort value)
         {
-            return GetBytes(value, sizeof (ushort));
+            return GetBytes(value, sizeof(ushort));
         }
 
         public byte[] GetBytes(int value)
         {
-            return GetBytes(value, sizeof (int));
+            return GetBytes(value, sizeof(int));
         }
 
         public byte[] GetBytes(uint value)
         {
-            return GetBytes(value, sizeof (uint));
+            return GetBytes(value, sizeof(uint));
         }
 
         public byte[] GetBytes(long value)
         {
-            return GetBytes(value, sizeof (long));
+            return GetBytes(value, sizeof(long));
         }
 
         public byte[] GetBytes(ulong value)
         {
-            return GetBytes((long)value, sizeof (ulong));
+            return GetBytes((long)value, sizeof(ulong));
         }
 
         public byte[] GetBytes(float value)
         {
-            return GetBytes(SingleToInt32(value), sizeof (int));
+            return GetBytes(SingleToInt32(value), sizeof(int));
         }
 
         public byte[] GetBytes(double value)
         {
-            return GetBytes(DoubleToInt64(value), sizeof (long));
+            return GetBytes(DoubleToInt64(value), sizeof(long));
         }
 
         private byte[] GetBytes(long value, int size)
@@ -65,7 +65,7 @@ namespace Hessian.Platform
             return buffer;
         }
 
-        #endregion
+        #endregion T -> byte[]
 
         #region byte[] -> T
 
@@ -77,52 +77,52 @@ namespace Hessian.Platform
 
         public char ToChar(byte[] value, int index)
         {
-            return (char) FromBytes(value, index, sizeof (char));
+            return (char)FromBytes(value, index, sizeof(char));
         }
 
         public short ToInt16(byte[] value, int index)
         {
-            return (short) FromBytes(value, index, sizeof (short));
+            return (short)FromBytes(value, index, sizeof(short));
         }
 
         public ushort ToUInt16(byte[] value, int index)
         {
-            return (ushort) FromBytes(value, index, sizeof (ushort));
+            return (ushort)FromBytes(value, index, sizeof(ushort));
         }
 
         public int ToInt32(byte[] value, int index)
         {
-            return (int) FromBytes(value, index, sizeof (int));
+            return (int)FromBytes(value, index, sizeof(int));
         }
 
         public uint ToUInt32(byte[] value, int index)
         {
-            return (uint) FromBytes(value, index, sizeof (uint));
+            return (uint)FromBytes(value, index, sizeof(uint));
         }
 
         public long ToInt64(byte[] value, int index)
         {
-            return FromBytes(value, index, sizeof (long));
+            return FromBytes(value, index, sizeof(long));
         }
 
         public ulong ToUInt64(byte[] value, int index)
         {
-            return (ulong) FromBytes(value, index, sizeof (ulong));
+            return (ulong)FromBytes(value, index, sizeof(ulong));
         }
 
         public float ToSingle(byte[] value, int index)
         {
-            var int32 = (int) FromBytes(value, index, sizeof (int));
+            var int32 = (int)FromBytes(value, index, sizeof(int));
             return Int32ToSingle(int32);
         }
 
         public double ToDouble(byte[] value, int index)
         {
-            var int64 = FromBytes(value, index, sizeof (long));
+            var int64 = FromBytes(value, index, sizeof(long));
             return Int64ToDouble(int64);
         }
 
-        #endregion
+        #endregion byte[] -> T
 
         protected abstract long FromBytes(byte[] bytes, int offset, int count);
 
@@ -157,13 +157,11 @@ namespace Hessian.Platform
             [FieldOffset(0)]
             private readonly float f;
 
-            public int AsInt
-            {
+            public int AsInt {
                 get { return i; }
             }
 
-            public float AsFloat
-            {
+            public float AsFloat {
                 get { return f; }
             }
 
@@ -189,13 +187,11 @@ namespace Hessian.Platform
             [FieldOffset(0)]
             private readonly double d;
 
-            public long AsLong
-            {
+            public long AsLong {
                 get { return l; }
             }
 
-            public double AsDouble
-            {
+            public double AsDouble {
                 get { return d; }
             }
 

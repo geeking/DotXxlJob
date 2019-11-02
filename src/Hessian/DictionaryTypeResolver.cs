@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hessian
 {
@@ -23,14 +20,14 @@ namespace Hessian
                 {"java.util.TreeMap", DefaultCtor},
                 {"java.util.concurrent.ConcurrentHashMap", DefaultCtor}
             };
-
         }
 
         public bool TryGetInstance(string type, out IDictionary<object, object> instance)
         {
             instance = null;
 
-            if (!constructors.TryGetValue(type, out var ctor)) {
+            if (!constructors.TryGetValue(type, out var ctor))
+            {
                 return false;
             }
 

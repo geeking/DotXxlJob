@@ -4,47 +4,43 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Hessian;
 using DotXxlJob.Core.Config;
 using DotXxlJob.Core.Model;
+using Hessian;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DotXxlJob.Core
 {
-    
     /// <summary>
     /// 负责执行Http请求，序列化和反序列化并发送响应
     /// </summary>
     public class XxlRpcServiceHandler
     {
-       
         private readonly JobDispatcher _jobDispatcher;
         private readonly IJobLogger _jobLogger;
         private readonly ILogger<XxlRpcServiceHandler> _logger;
         private readonly XxlJobExecutorOptions _options;
 
         private readonly ConcurrentDictionary<string, MethodInfo> METHOD_CACHE =
-            new ConcurrentDictionary<string, MethodInfo>(); 
-            
+            new ConcurrentDictionary<string, MethodInfo>();
+
         public XxlRpcServiceHandler(IOptions<XxlJobExecutorOptions> optionsAccessor,
-            JobDispatcher jobDispatcher, 
+            JobDispatcher jobDispatcher,
             IJobLogger jobLogger,
             ILogger<XxlRpcServiceHandler> logger)
         {
-           
             this._jobDispatcher = jobDispatcher;
             this._jobLogger = jobLogger;
             this._logger = logger;
-        
+
             this._options = optionsAccessor.Value;
             if (this._options == null)
             {
-                throw  new ArgumentNullException(nameof(XxlJobExecutorOptions));
+                throw new ArgumentNullException(nameof(XxlJobExecutorOptions));
             }
-            
         }
-        
+
         /// <summary>
         /// 处理XxlRpc请求流
         /// </summary>
@@ -53,29 +49,28 @@ namespace DotXxlJob.Core
         public async Task<byte[]> HandlerAsync(Stream reqStream)
         {
             var req = HessianSerializer.DeserializeRequest(reqStream);
-            
-            var res = new RpcResponse { RequestId = req.RequestId};
-            
+
+            var res = new RpcResponse { RequestId = req.RequestId };
+
             if (!ValidRequest(req, out var error))
             {
-                this._logger.LogWarning("job task request is not valid:{error}",error);
+                this._logger.LogWarning("job task request is not valid:{error}", error);
                 res.ErrorMsg = error;
             }
             else
             {
                 this._logger.LogDebug("receive job task ,req.RequestId={requestId},method={methodName}"
-                    ,req.RequestId,req.MethodName);
+                    , req.RequestId, req.MethodName);
                 await Invoke(req, res);
                 this._logger.LogDebug("completed receive job task ,req.RequestId={requestId},method={methodName},IsError={IsError}"
-                    ,req.RequestId,req.MethodName,res.IsError);
+                    , req.RequestId, req.MethodName, res.IsError);
             }
-          
+
             using (var outputStream = new MemoryStream())
             {
-                HessianSerializer.SerializeResponse(outputStream,res);
+                HessianSerializer.SerializeResponse(outputStream, res);
                 return outputStream.GetBuffer();
             }
-            
         }
 
         /// <summary>
@@ -84,7 +79,7 @@ namespace DotXxlJob.Core
         /// <param name="req"></param>
         /// <param name="error"></param>
         /// <returns></returns>
-        private bool ValidRequest(RpcRequest req,out string error)
+        private bool ValidRequest(RpcRequest req, out string error)
         {
             error = string.Empty;
             if (req == null)
@@ -92,25 +87,25 @@ namespace DotXxlJob.Core
                 error = "unknown request stream data,codec fail";
                 return false;
             }
-            
+
             if (!"com.xxl.job.core.biz.ExecutorBiz".Equals(req.ClassName)) //
             {
-                error =  "not supported request!";
-                return false;
-            }
-             
-            if (DateTime.UtcNow.Subtract(req.CreateMillisTime.FromMilliseconds()) > Constants.RpcRequestExpireTimeSpan)
-            {
-                error =  "request is timeout!";
+                error = "not supported request!";
                 return false;
             }
 
-            if (!string.IsNullOrEmpty(this._options.AccessToken) && this._options.AccessToken !=  req.AccessToken)
+            if (DateTime.UtcNow.Subtract(req.CreateMillisTime.FromMilliseconds()) > Constants.RpcRequestExpireTimeSpan)
+            {
+                error = "request is timeout!";
+                return false;
+            }
+
+            if (!string.IsNullOrEmpty(this._options.AccessToken) && this._options.AccessToken != req.AccessToken)
             {
                 error = "need authorize";
                 return false;
             }
-            
+
             return true;
         }
 
@@ -128,24 +123,22 @@ namespace DotXxlJob.Core
                 if (method == null)
                 {
                     res.ErrorMsg = $"The method{req.MethodName} is not defined.";
-                    this._logger.LogWarning( $"The method{req.MethodName} is not defined.");
+                    this._logger.LogWarning($"The method{req.MethodName} is not defined.");
                 }
                 else
                 {
                     var result = method.Invoke(this, req.Parameters.ToArray());
-                    
+
                     res.Result = result;
                 }
-               
             }
             catch (Exception ex)
             {
-                res.ErrorMsg = ex.Message +"\n--------------\n"+ ex.StackTrace;
-                this._logger.LogError(ex,"invoke method error:{0}",ex.Message);
+                res.ErrorMsg = ex.Message + "\n--------------\n" + ex.StackTrace;
+                this._logger.LogError(ex, "invoke method error:{0}", ex.Message);
             }
 
             return Task.CompletedTask;
-
         }
 
         private MethodInfo GetMethodInfo(string methodName)
@@ -154,9 +147,9 @@ namespace DotXxlJob.Core
             {
                 return method;
             }
-            
+
             var type = GetType();
-            method = type.GetMethod( methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
+            method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
             if (method != null)
             {
                 METHOD_CACHE.TryAdd(methodName, method);
@@ -164,10 +157,9 @@ namespace DotXxlJob.Core
 
             return method;
         }
-        
-        
+
         #region rpc service
-        
+
         private ReturnT Beat()
         {
             return ReturnT.SUCCESS;
@@ -180,9 +172,9 @@ namespace DotXxlJob.Core
 
         private ReturnT Kill(int jobId)
         {
-            return this._jobDispatcher.TryRemoveJobTask(jobId) ? 
-                ReturnT.SUCCESS 
-                : 
+            return this._jobDispatcher.TryRemoveJobTask(jobId) ?
+                ReturnT.SUCCESS
+                :
                 ReturnT.Success("job thread already killed.");
         }
 
@@ -195,7 +187,7 @@ namespace DotXxlJob.Core
         /// <returns></returns>
         private ReturnT Log(long logDateTime, long logId, int fromLineNum)
         {
-            var ret =  ReturnT.Success(null);
+            var ret = ReturnT.Success(null);
             ret.Content = this._jobLogger.ReadLog(logDateTime, logId, fromLineNum);
             return ret;
         }
@@ -207,11 +199,9 @@ namespace DotXxlJob.Core
         /// <returns></returns>
         private ReturnT Run(TriggerParam triggerParam)
         {
-             return this._jobDispatcher.Execute(triggerParam);
+            return this._jobDispatcher.Execute(triggerParam);
         }
-        #endregion
-        
-        
-        
+
+        #endregion rpc service
     }
 }

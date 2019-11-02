@@ -5,7 +5,7 @@ namespace DotXxlJob.Core.Model
     [DataContract(Name = Constants.JavaClassFulName)]
     public class JavaClass
     {
-        [DataMember(Name = "name",Order = 1)]
+        [DataMember(Name = "name", Order = 1)]
         public string Name { get; set; }
     }
 }

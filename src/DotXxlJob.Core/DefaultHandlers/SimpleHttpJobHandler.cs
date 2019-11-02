@@ -8,16 +8,18 @@ using DotXxlJob.Core.Model;
 namespace DotXxlJob.Core.DefaultHandlers
 {
     [JobHandler("simpleHttpJobHandler")]
-    public class SimpleHttpJobHandler:AbsJobHandler
+    public class SimpleHttpJobHandler : AbsJobHandler
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
         private static readonly Regex UrlPattern =
             new Regex(@"(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]");
+
         public SimpleHttpJobHandler(IHttpClientFactory httpClientFactory)
         {
             this._httpClientFactory = httpClientFactory;
         }
+
         public override async Task<ReturnT> Execute(JobExecuteContext context)
         {
             if (string.IsNullOrEmpty(context.JobParameter))
@@ -31,12 +33,12 @@ namespace DotXxlJob.Core.DefaultHandlers
             {
                 return ReturnT.Failed("url format is not valid");
             }
-            context.JobLogger.Log("Get Request Data:{0}",context.JobParameter);
+            context.JobLogger.Log("Get Request Data:{0}", context.JobParameter);
             using (var client = this._httpClientFactory.CreateClient(Constants.DefaultHttpClientName))
             {
                 try
                 {
-                    var response =  await client.GetAsync(url);
+                    var response = await client.GetAsync(url);
                     if (response == null)
                     {
                         context.JobLogger.Log("call remote error,response is null");
@@ -45,12 +47,12 @@ namespace DotXxlJob.Core.DefaultHandlers
 
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        context.JobLogger.Log("call remote error,response statusCode ={0}",response.StatusCode);
-                        return ReturnT.Failed("call remote error,response statusCode ="+response.StatusCode);
+                        context.JobLogger.Log("call remote error,response statusCode ={0}", response.StatusCode);
+                        return ReturnT.Failed("call remote error,response statusCode =" + response.StatusCode);
                     }
 
                     string body = await response.Content.ReadAsStringAsync();
-                    context.JobLogger.Log("<br/> call remote success ,response is : <br/> {0}",body);
+                    context.JobLogger.Log("<br/> call remote success ,response is : <br/> {0}", body);
                     return ReturnT.SUCCESS;
                 }
                 catch (Exception ex)
@@ -58,9 +60,7 @@ namespace DotXxlJob.Core.DefaultHandlers
                     context.JobLogger.LogError(ex);
                     return ReturnT.Failed(ex.Message);
                 }
-              
             }
         }
     }
-    
 }

@@ -7,7 +7,7 @@ namespace DotXxlJob.Core
     /// <summary>
     ///  NOTE: 负责启动Executor服务，和进行服务注册的宿主服务
     /// </summary>
-    public class JobsExecuteHostedService:BackgroundService 
+    public class JobsExecuteHostedService : BackgroundService
     {
         private readonly IExecutorRegistry _registry;
 
@@ -20,6 +20,5 @@ namespace DotXxlJob.Core
         {
             return this._registry.RegistryAsync(stoppingToken);
         }
-      
     }
 }

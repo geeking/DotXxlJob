@@ -30,7 +30,7 @@ namespace Hessian.Collections
 
         public override ICollection<TValue> Values {
             get { return inverse.dict.Keys; }
-        } 
+        }
 
         public TwoWayDictionary()
             : this(new Dictionary<TKey, TValue>(), new Dictionary<TValue, TKey>())
@@ -71,7 +71,8 @@ namespace Hessian.Collections
 
         private void UpdateDictAndInverse(TKey key, TValue value, bool throwIfContained)
         {
-            if (!throwIfContained) {
+            if (!throwIfContained)
+            {
                 dict.Remove(key);
                 inverse.dict.Remove(value);
             }
@@ -83,7 +84,8 @@ namespace Hessian.Collections
         private bool RemoveFromDictAndInverse(TKey key)
         {
             TValue value;
-            if (!TryGetValue(key, out value)) {
+            if (!TryGetValue(key, out value))
+            {
                 return false;
             }
 
@@ -92,7 +94,8 @@ namespace Hessian.Collections
 
         private bool RemoveFromDictAndInverse(TKey key, TValue value)
         {
-            if (!ContainsKey(key) || !ContainsValue(value)) {
+            if (!ContainsKey(key) || !ContainsValue(value))
+            {
                 return false;
             }
 
@@ -100,7 +103,6 @@ namespace Hessian.Collections
         }
 
         #region ICollection<KeyValuePair<TKey, TValue>>
-
 
         public override bool Remove(KeyValuePair<TKey, TValue> kvp)
         {
@@ -118,6 +120,6 @@ namespace Hessian.Collections
             return ContainsKey(kvp.Key) && ContainsValue(kvp.Value);
         }
 
-        #endregion
+        #endregion ICollection<KeyValuePair<TKey, TValue>>
     }
 }

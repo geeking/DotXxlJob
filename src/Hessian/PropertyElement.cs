@@ -10,7 +10,7 @@ namespace Hessian
         public int Order { get; set; }
         public PropertyInfo PropertyInfo { get; set; }
     }
-    
+
     internal class PropertyComparer : IComparer<PropertyElement>
     {
         private readonly IComparer<int> comparer;

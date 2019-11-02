@@ -6,14 +6,12 @@ namespace Hessian
 {
     public class HessianSerializationContext
     {
-        public IList<Type> Classes
-        {
+        public IList<Type> Classes {
             get;
             private set;
         }
 
-        public IList Instances
-        {
+        public IList Instances {
             get;
             private set;
         }

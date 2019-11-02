@@ -10,7 +10,8 @@ namespace Hessian
 
         public PeekStream(Stream inner)
         {
-            if (inner == null) {
+            if (inner == null)
+            {
                 throw new ArgumentNullException("inner");
             }
 
@@ -51,24 +52,27 @@ namespace Hessian
             }
         }
 
-        public byte? Peek ()
+        public byte? Peek()
         {
-            if (!peek.HasValue) {
+            if (!peek.HasValue)
+            {
                 var b = inner.ReadByte();
 
-                if (b == -1) {
+                if (b == -1)
+                {
                     return null;
                 }
 
-                peek = (byte) b;
+                peek = (byte)b;
             }
 
             return peek;
         }
 
-        public override int ReadByte ()
+        public override int ReadByte()
         {
-            if (peek.HasValue) {
+            if (peek.HasValue)
+            {
                 var val = peek.Value;
                 peek = null;
                 return val;
@@ -77,7 +81,7 @@ namespace Hessian
             return inner.ReadByte();
         }
 
-        public override int Read (byte[] buffer, int offset, int count)
+        public override int Read(byte[] buffer, int offset, int count)
         {
             Conditions.CheckNotNull(buffer, "buffer");
             Conditions.CheckGreaterOrEqual(offset, 0, "offset");
@@ -87,20 +91,23 @@ namespace Hessian
                 offset + count <= buffer.Length,
                 "Buffer is not big enough to contain the requested amount of data at the given offset.");
 
-            if (count == 0) {
+            if (count == 0)
+            {
                 return 0;
             }
 
             var bytesToRead = count;
 
-            if (peek.HasValue) {
+            if (peek.HasValue)
+            {
                 buffer[offset++] = peek.Value;
                 peek = null;
                 --bytesToRead;
             }
 
             int bytesRead;
-            while (bytesToRead > 0 && (bytesRead = inner.Read (buffer, offset, bytesToRead)) != 0) {
+            while (bytesToRead > 0 && (bytesRead = inner.Read(buffer, offset, bytesToRead)) != 0)
+            {
                 offset += bytesRead;
                 bytesToRead -= bytesRead;
             }
@@ -108,35 +115,35 @@ namespace Hessian
             return count - bytesToRead;
         }
 
-        public override void Write (byte[] buffer, int offset, int count)
+        public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotSupportedException("Writes not supported.");
         }
 
-        public override void SetLength (long value)
+        public override void SetLength(long value)
         {
             throw new NotSupportedException("Seeking not supported.");
         }
 
-        public override long Seek (long offset, SeekOrigin origin)
+        public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException("Seeking not supported.");
         }
 
-        public override void Flush ()
+        public override void Flush()
         {
             throw new NotSupportedException("Writes not supported.");
         }
 
-        protected override void Dispose (bool disposing)
+        protected override void Dispose(bool disposing)
         {
-            if (inner != null) {
-                inner.Dispose ();
+            if (inner != null)
+            {
+                inner.Dispose();
                 inner = null;
             }
 
-            base.Dispose (disposing);
+            base.Dispose(disposing);
         }
     }
 }
-

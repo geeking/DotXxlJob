@@ -7,13 +7,11 @@ namespace Hessian.Collections
     {
         protected abstract IDictionary<TKey, TValue> Delegate { get; }
 
-        public virtual ICollection<TKey> Keys
-        {
+        public virtual ICollection<TKey> Keys {
             get { return Delegate.Keys; }
         }
 
-        public virtual ICollection<TValue> Values
-        {
+        public virtual ICollection<TValue> Values {
             get { return Delegate.Values; }
         }
 
@@ -52,13 +50,11 @@ namespace Hessian.Collections
             return Delegate.Remove(item);
         }
 
-        public virtual int Count
-        {
+        public virtual int Count {
             get { return Delegate.Count; }
         }
 
-        public virtual bool IsReadOnly
-        {
+        public virtual bool IsReadOnly {
             get { return Delegate.IsReadOnly; }
         }
 
@@ -82,8 +78,7 @@ namespace Hessian.Collections
             return Delegate.TryGetValue(key, out value);
         }
 
-        public virtual TValue this[TKey key]
-        {
+        public virtual TValue this[TKey key] {
             get { return Delegate[key]; }
             set { Delegate[key] = value; }
         }

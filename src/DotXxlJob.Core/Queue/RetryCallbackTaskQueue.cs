@@ -10,18 +10,17 @@ using Microsoft.Extensions.Logging;
 
 namespace DotXxlJob.Core.Queue
 {
-    public class RetryCallbackTaskQueue:IDisposable
+    public class RetryCallbackTaskQueue : IDisposable
     {
-        
         private readonly Action<HandleCallbackParam> _actionDoCallback;
         private readonly ILogger<RetryCallbackTaskQueue> _logger;
 
         private CancellationTokenSource _cancellation;
         private Task _runTask;
         private readonly string _backupFile;
-        public RetryCallbackTaskQueue(string backupPath,Action<HandleCallbackParam> actionDoCallback,ILogger<RetryCallbackTaskQueue> logger)
+
+        public RetryCallbackTaskQueue(string backupPath, Action<HandleCallbackParam> actionDoCallback, ILogger<RetryCallbackTaskQueue> logger)
         {
-            
             _actionDoCallback = actionDoCallback;
             _logger = logger;
             _backupFile = Path.Combine(backupPath, Constants.XxlJobRetryLogsFile);
@@ -30,7 +29,7 @@ namespace DotXxlJob.Core.Queue
             {
                 Directory.CreateDirectory(dir ?? throw new Exception("logs path is empty"));
             }
-            
+
             StartQueue();
         }
 
@@ -43,9 +42,8 @@ namespace DotXxlJob.Core.Queue
                 while (!stopToken.IsCancellationRequested)
                 {
                     await LoadFromFile();
-                    await Task.Delay(Constants.CallbackRetryInterval,stopToken);
+                    await Task.Delay(Constants.CallbackRetryInterval, stopToken);
                 }
-              
             }, TaskCreationOptions.LongRunning);
         }
 
@@ -67,11 +65,10 @@ namespace DotXxlJob.Core.Queue
                     {
                         list.Add(Utf8Json.JsonSerializer.Deserialize<HandleCallbackParam>(nextLine, ProjectDefaultResolver.Instance));
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-                        _logger.LogError(ex,"read backup file  error:{error}",ex.Message);
+                        _logger.LogError(ex, "read backup file  error:{error}", ex.Message);
                     }
-                   
                 }
             }
 
@@ -79,7 +76,6 @@ namespace DotXxlJob.Core.Queue
             {
                 File.Delete(_backupFile); //删除备份文件
             }
-
             catch (Exception ex)
             {
                 _logger.LogError(ex, "delete backup file  error:{error}", ex.Message);
@@ -91,7 +87,6 @@ namespace DotXxlJob.Core.Queue
                     _actionDoCallback(item);
                 }
             }
-            
         }
 
         public void Push(List<HandleCallbackParam> list)
@@ -103,7 +98,6 @@ namespace DotXxlJob.Core.Queue
 
             try
             {
-              
                 using (var writer = new StreamWriter(this._backupFile, true, Encoding.UTF8))
                 {
                     foreach (var item in list)
@@ -115,7 +109,7 @@ namespace DotXxlJob.Core.Queue
                         else
                         {
                             item.CallbackRetryTimes++;
-                            byte[] buffer = Utf8Json.JsonSerializer.Serialize(item,ProjectDefaultResolver.Instance);
+                            byte[] buffer = Utf8Json.JsonSerializer.Serialize(item, ProjectDefaultResolver.Instance);
                             writer.WriteLine(Encoding.UTF8.GetString(buffer));
                         }
                     }

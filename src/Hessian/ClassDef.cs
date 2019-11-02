@@ -15,14 +15,16 @@ namespace Hessian
 
         public override int GetHashCode()
         {
-            unchecked {
+            unchecked
+            {
                 const uint prime = 16777619;
                 var hash = 2166136261;
 
                 hash *= prime;
                 hash ^= (uint)Name.GetHashCode();
 
-                for (var i = 0; i < Fields.Length; ++i) {
+                for (var i = 0; i < Fields.Length; ++i)
+                {
                     hash *= prime;
                     hash ^= (uint)Fields[i].GetHashCode();
                 }
@@ -33,24 +35,29 @@ namespace Hessian
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) {
+            if (ReferenceEquals(null, obj))
+            {
                 return false;
             }
-            if (ReferenceEquals(this, obj)) {
+            if (ReferenceEquals(this, obj))
+            {
                 return true;
             }
-            if (obj.GetType() != GetType()) {
+            if (obj.GetType() != GetType())
+            {
                 return false;
             }
-            return Equals((ClassDef) obj);
+            return Equals((ClassDef)obj);
         }
 
         public bool Equals(ClassDef other)
         {
-            if (ReferenceEquals(null, other)) {
+            if (ReferenceEquals(null, other))
+            {
                 return false;
             }
-            if (ReferenceEquals(this, other)) {
+            if (ReferenceEquals(this, other))
+            {
                 return true;
             }
             return string.Equals(Name, other.Name) && Fields.Equals(other.Fields);

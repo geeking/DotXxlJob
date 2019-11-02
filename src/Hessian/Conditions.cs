@@ -10,11 +10,13 @@ namespace Hessian
 
         public static void CheckArgument(bool condition, string message, params object[] args)
         {
-            if (condition) {
+            if (condition)
+            {
                 return;
             }
 
-            if (args.Length > 0) {
+            if (args.Length > 0)
+            {
                 message = String.Format(message, args);
             }
 
@@ -22,9 +24,10 @@ namespace Hessian
         }
 
         public static T CheckNotNull<T>(T value, string name)
-            where T : class 
+            where T : class
         {
-            if (!ReferenceEquals(value, null)) {
+            if (!ReferenceEquals(value, null))
+            {
                 return value;
             }
 
@@ -35,7 +38,8 @@ namespace Hessian
                                                                         string name)
             where TComparable : IComparable<TComparand>
         {
-            if (value.CompareTo(bounds) > 0) {
+            if (value.CompareTo(bounds) > 0)
+            {
                 return value;
             }
 
@@ -46,7 +50,8 @@ namespace Hessian
                                                                         string name)
             where TComparable : IComparable<TComparand>
         {
-            if (value.CompareTo(bounds) < 0) {
+            if (value.CompareTo(bounds) < 0)
+            {
                 return value;
             }
 
@@ -57,7 +62,8 @@ namespace Hessian
                                                                         string name)
             where TComparable : IComparable<TComparand>
         {
-            if (value.CompareTo(bounds) >= 0) {
+            if (value.CompareTo(bounds) >= 0)
+            {
                 return value;
             }
 
@@ -68,7 +74,8 @@ namespace Hessian
                                                                         string name)
             where TComparable : IComparable<TComparand>
         {
-            if (value.CompareTo(bounds) <= 0) {
+            if (value.CompareTo(bounds) <= 0)
+            {
                 return value;
             }
 
@@ -77,7 +84,8 @@ namespace Hessian
 
         public static int CheckGreater(int value, int bounds, string name)
         {
-            if (value > bounds) {
+            if (value > bounds)
+            {
                 return value;
             }
 
@@ -86,7 +94,8 @@ namespace Hessian
 
         public static int CheckLess(int value, int bounds, string name)
         {
-            if (value < bounds) {
+            if (value < bounds)
+            {
                 return value;
             }
 
@@ -95,7 +104,8 @@ namespace Hessian
 
         public static int CheckGreaterOrEqual(int value, int bounds, string name)
         {
-            if (value >= bounds) {
+            if (value >= bounds)
+            {
                 return value;
             }
 
@@ -104,7 +114,8 @@ namespace Hessian
 
         public static int CheckLessOrEqual(int value, int bounds, string name)
         {
-            if (value <= bounds) {
+            if (value <= bounds)
+            {
                 return value;
             }
 

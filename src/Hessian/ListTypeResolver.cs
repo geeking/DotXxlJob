@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hessian
 {
     public class ListTypeResolver
     {
         private readonly Dictionary<string, Func<IList<object>>> constructors = new Dictionary<string, Func<IList<object>>>();
-        private readonly Dictionary<string, Func<int, IList<object>>> length_constructors = new Dictionary<string, Func<int, IList<object>>>(); 
+        private readonly Dictionary<string, Func<int, IList<object>>> length_constructors = new Dictionary<string, Func<int, IList<object>>>();
         private readonly Func<IList<object>> empty_list_ctor = () => new List<object>();
-        private readonly Func<int, IList<object>> empty_list_ctor_with_length = length => new List<object>(length); 
+        private readonly Func<int, IList<object>> empty_list_ctor_with_length = length => new List<object>(length);
 
         public ListTypeResolver()
         {
@@ -42,7 +39,8 @@ namespace Hessian
             list = null;
 
             Func<IList<object>> ctor;
-            if (!constructors.TryGetValue(type, out ctor)) {
+            if (!constructors.TryGetValue(type, out ctor))
+            {
                 return false;
             }
 
@@ -55,7 +53,8 @@ namespace Hessian
             list = null;
 
             Func<int, IList<object>> ctor;
-            if (!length_constructors.TryGetValue(type, out ctor)) {
+            if (!length_constructors.TryGetValue(type, out ctor))
+            {
                 return false;
             }
 

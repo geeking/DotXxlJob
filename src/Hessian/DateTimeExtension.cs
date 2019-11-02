@@ -3,7 +3,7 @@
 namespace Hessian
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static class DateTimeExtension
     {
@@ -11,17 +11,17 @@ namespace Hessian
         private const long Millis = 60000;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>
         public static long GetTotalMilliseconds(this DateTime dt)
         {
-            return dt.ToUniversalTime().Ticks / 10000 - Era; 
+            return dt.ToUniversalTime().Ticks / 10000 - Era;
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>
@@ -32,7 +32,7 @@ namespace Hessian
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -43,7 +43,7 @@ namespace Hessian
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>

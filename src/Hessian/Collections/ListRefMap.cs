@@ -14,7 +14,8 @@ namespace Hessian.Collections
 
         public T Get(int refId)
         {
-            if (refId < 0 || refId >= list.Count) {
+            if (refId < 0 || refId >= list.Count)
+            {
                 throw new InvalidRefException(refId);
             }
             return list[refId];
@@ -22,8 +23,10 @@ namespace Hessian.Collections
 
         public int? Lookup(T entry)
         {
-            for (var i = 0; i < list.Count; ++i) {
-                if (entry.Equals(list[i])) {
+            for (var i = 0; i < list.Count; ++i)
+            {
+                if (entry.Equals(list[i]))
+                {
                     return i;
                 }
             }
