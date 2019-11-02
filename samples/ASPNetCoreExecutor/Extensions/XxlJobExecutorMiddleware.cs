@@ -25,18 +25,8 @@ namespace ASPNetCoreExecutor
         public async Task Invoke(HttpContext context)
         {
 
-            if ("POST".Equals(context.Request.Method, StringComparison.OrdinalIgnoreCase) && 
-                "application/octet-stream".Equals(context.Request.ContentType, StringComparison.OrdinalIgnoreCase))
+            if ("POST".Equals(context.Request.Method, StringComparison.OrdinalIgnoreCase) )
             {
-                /*
-                using (Stream file = File.Create("./"+DateTime.Now.ToUnixTimeSeconds()+".data"))
-                {
-                    context.Request.Body.CopyTo(file);
-                }
-                
-                return;
-                */
-                
                 var rsp =  await _rpcService.HandlerAsync(context.Request.Body);
 
                 context.Response.StatusCode = (int) HttpStatusCode.OK;

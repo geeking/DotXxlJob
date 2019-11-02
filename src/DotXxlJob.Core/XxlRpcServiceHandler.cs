@@ -193,7 +193,7 @@ namespace DotXxlJob.Core
         /// <param name="logId"></param>
         /// <param name="fromLineNum"></param>
         /// <returns></returns>
-        private ReturnT Log(long logDateTime, int logId, int fromLineNum)
+        private ReturnT Log(long logDateTime, long logId, int fromLineNum)
         {
             var ret =  ReturnT.Success(null);
             ret.Content = this._jobLogger.ReadLog(logDateTime, logId, fromLineNum);
